@@ -1,0 +1,15 @@
+node_modules
+__pycache__
+*.pyc
+data/raw/*
+!data/raw/.gitkeep
+data/processed
+mlruns
+models/*.png
+logs
+.git
+.github
+docker
+tests
+README.md
+.pytest_cache

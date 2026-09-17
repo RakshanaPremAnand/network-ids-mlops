@@ -1,0 +1,35 @@
+# Data (CICIDS-2017 is ~6GB and not something you want in git)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Model artifacts & experiment tracking
+models/*
+!models/.gitkeep
+mlruns/
+mlartifacts/
+
+# Logs (predictions log can get large)
+logs/*
+!logs/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env secrets
+.env

@@ -1,0 +1,59 @@
+name: CI/CD - NIDS MLOps Pipeline
+
+# Matches the deck: on every commit -> pytest -> docker build -> DockerHub push.
+# Requires two repo secrets to actually push images: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN.
+# Without them, the test job still runs and the build job is skipped safely.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate synthetic sample data (CI has no real dataset)
+        run: python -m scripts.generate_sample_data
+
+      - name: Run preprocessing
+        run: python -m src.data.preprocess
+
+      - name: Train a quick model (needed so API tests can load it)
+        run: python -m src.models.train
+
+      - name: Run test suite
+        run: pytest tests/ -v
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    # Only attempt a DockerHub push if the secrets are configured
+    if: ${{ github.event_name == 'push' && vars.DOCKERHUB_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nids-api:latest
