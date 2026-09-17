@@ -4,9 +4,9 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 
+
 # Model artifacts & experiment tracking
-models/*
-!models/.gitkeep
+models/*.png
 mlruns/
 mlartifacts/
 
